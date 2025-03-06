@@ -1,7 +1,3 @@
-"""
-Протестируйте классы из модуля homework/models.py
-"""
-
 import pytest
 
 from models import Cart, Product
@@ -13,11 +9,6 @@ def product():
 
 
 class TestProducts:
-    """
-    Тестовый класс - это способ группировки ваших тестов по какой-то тематике
-    Например, текущий класс группирует тесты на класс Product
-    """
-
     @pytest.mark.parametrize(
         "requested_quantity, expected_result",
         [(999, True), (1000, True), (1001, False)],
@@ -25,20 +16,13 @@ class TestProducts:
     def test_product_check_quantity(self, product, requested_quantity, expected_result):
         assert product.check_quantity(requested_quantity) == expected_result
 
-    @pytest.mark.parametrize(
-        "requested_quantity, expected_exception",
-        [(-1, ValueError)],
-    )
-    def test_product_check_quantity_exception(
-        self, product, requested_quantity, expected_exception
-    ):
-        with pytest.raises(expected_exception):
-            product.check_quantity(requested_quantity)
+    def test_product_check_quantity_exception(self, product):
+        with pytest.raises(ValueError):
+            product.check_quantity(-1)
 
-    @pytest.mark.parametrize("requested_quantity, expected_result", [(1000, 0)])
-    def test_product_buy(self, product, requested_quantity, expected_result):
-        product.buy(requested_quantity)
-        assert product.quantity == expected_result
+    def test_product_buy(self, product):
+        product.buy(1000)
+        assert product.quantity == 0
 
     @pytest.mark.parametrize(
         "requested_quantity, expected_exception",
@@ -52,13 +36,6 @@ class TestProducts:
 
 
 class TestCart:
-    """
-    TODO Напишите тесты на методы класса Cart
-        На каждый метод у вас должен получиться отдельный тест
-        На некоторые методы у вас может быть несколько тестов.
-        Например, негативные тесты, ожидающие ошибку (используйте pytest.raises, чтобы проверить это)
-    """
-
     def test_new_cart_is_empty(self):
         cart = Cart()
         assert len(cart.products) == 0
