@@ -14,20 +14,25 @@ class Product:
         self.description = description
         self.quantity = quantity
 
-    def check_quantity(self, quantity) -> bool:
+    def check_quantity(self, requested_quantity) -> bool:
         """
-        TODO Верните True если количество продукта больше или равно запрашиваемому
-            и False в обратном случае
+        Метод проверки количества продуктов на складе.
+        Возвращает True, если количество продуктов больше или равно запрашиваемому
+        и False в обратном случае
         """
-        raise NotImplementedError
+        if requested_quantity < 0:
+            raise ValueError("Запрашиваемое количество не может быть отрицательным")
+        return self.quantity >= requested_quantity
 
-    def buy(self, quantity):
+    def buy(self, requested_quantity):
         """
-        TODO реализуйте метод покупки
-            Проверьте количество продукта используя метод check_quantity
-            Если продуктов не хватает, то выбросите исключение ValueError
+        Метод покупки. Вычитает запрашиваемое количество продуктов из общего количества.
+        Если запрашиваемое количество продуктов больше общего, то выбрасывает исключение ValueError
         """
-        raise NotImplementedError
+        if self.check_quantity(requested_quantity):
+            self.quantity -= requested_quantity
+        else:
+            raise ValueError("Запрашиваемое количество больше, чем есть в наличии")
 
     def __hash__(self):
         return hash(self.name + self.description)
@@ -36,7 +41,6 @@ class Product:
 class Cart:
     """
     Класс корзины. В нем хранятся продукты, которые пользователь хочет купить.
-    TODO реализуйте все методы класса
     """
 
     # Словарь продуктов и их количество в корзине
@@ -51,7 +55,13 @@ class Cart:
         Метод добавления продукта в корзину.
         Если продукт уже есть в корзине, то увеличиваем количество
         """
-        raise NotImplementedError
+        if buy_count <= 0:
+            raise ValueError(
+                "Добавляемое количество товара не может быть меньше или равно нулю"
+            )
+
+        # Если продукта нет в корзине, то при получении его количества вернется 0
+        self.products[product] = self.products.get(product, 0) + buy_count
 
     def remove_product(self, product: Product, remove_count=None):
         """
@@ -59,13 +69,35 @@ class Cart:
         Если remove_count не передан, то удаляется вся позиция
         Если remove_count больше, чем количество продуктов в позиции, то удаляется вся позиция
         """
-        raise NotImplementedError
+        # Проверка наличия продукта в корзине
+        if product not in self.products:
+            raise ValueError("Продукт отсутствует в корзине")
+
+        # Проверка, что если remove_count указан, он не отрицательный
+        if remove_count is not None and remove_count < 0:
+            raise ValueError("Удаляемое количество не может быть отрицательным")
+
+        current_count = self.products[product]
+        # Если не указан remove_count или его значение больше или равно текущему количеству, удаляем всю позицию
+        if remove_count is None or remove_count >= current_count:
+            self.products.pop(product)
+        else:
+            self.products[product] = current_count - remove_count
 
     def clear(self):
-        raise NotImplementedError
+        """
+        Метод очистки корзины
+        """
+        self.products.clear()
 
     def get_total_price(self) -> float:
-        raise NotImplementedError
+        """
+        Метод расчета общей стоимости всех продуктов в корзине
+        Возвращает общую стоимость
+        """
+        return sum(
+            product.price * quantity for product, quantity in self.products.items()
+        )
 
     def buy(self):
         """
@@ -73,4 +105,10 @@ class Cart:
         Учтите, что товаров может не хватать на складе.
         В этом случае нужно выбросить исключение ValueError
         """
-        raise NotImplementedError
+        if len(self.products) == 0:
+            raise ValueError("Корзина пуста")
+
+        for product, requested_quantity in list(self.products.items()):
+            # Если товара не хватает, то в buy будет ValueError
+            product.buy(requested_quantity)
+        self.clear()  # Очищаем всю корзину после покупки
