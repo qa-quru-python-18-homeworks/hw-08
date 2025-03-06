@@ -66,6 +66,13 @@ class TestCart:
         cart.remove_product(product, remove_count=5)
         assert cart.products[product] == 5
 
+    @pytest.mark.parametrize("remove_count", [-1, 0])
+    def test_remove_zero_or_less_product_from_cart(self, product, remove_count):
+        cart = Cart()
+        cart.add_product(product, buy_count=10)
+        with pytest.raises(ValueError):
+            cart.remove_product(product, remove_count)
+
     def test_clear_cart(self, product):
         cart = Cart()
         cart.add_product(product)

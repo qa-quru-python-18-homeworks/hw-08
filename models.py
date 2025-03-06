@@ -21,7 +21,7 @@ class Product:
         и False в обратном случае
         """
         if requested_quantity < 0:
-            raise ValueError("Запрашиваемое количество не может быть отрицательным")
+            raise ValueError(f"Запрашиваемое количество ({requested_quantity}) не может быть отрицательным")
         return self.quantity >= requested_quantity
 
     def buy(self, requested_quantity):
@@ -32,7 +32,9 @@ class Product:
         if self.check_quantity(requested_quantity):
             self.quantity -= requested_quantity
         else:
-            raise ValueError("Запрашиваемое количество больше, чем есть в наличии")
+            raise ValueError(
+                f"Запрашиваемое количество ({requested_quantity}) больше, чем есть в наличии ({self.quantity})"
+            )
 
     def __hash__(self):
         return hash(self.name + self.description)
@@ -57,7 +59,7 @@ class Cart:
         """
         if buy_count <= 0:
             raise ValueError(
-                "Добавляемое количество товара не может быть меньше или равно нулю"
+                f"Добавляемое количество товара ({buy_count}) не может быть меньше или равно нулю"
             )
 
         # Если продукта нет в корзине, то при получении его количества вернется 0
@@ -71,11 +73,11 @@ class Cart:
         """
         # Проверка наличия продукта в корзине
         if product not in self.products:
-            raise ValueError("Продукт отсутствует в корзине")
+            raise ValueError(f"Продукт ({product.name}) отсутствует в корзине")
 
         # Проверка, что если remove_count указан, он не отрицательный
-        if remove_count is not None and remove_count < 0:
-            raise ValueError("Удаляемое количество не может быть отрицательным")
+        if remove_count is not None and remove_count <= 0:
+            raise ValueError(f"Удаляемое количество ({remove_count}) не может быть меньше или равно нулю")
 
         current_count = self.products[product]
         # Если не указан remove_count или его значение больше или равно текущему количеству, удаляем всю позицию
